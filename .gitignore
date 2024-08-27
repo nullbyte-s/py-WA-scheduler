@@ -1,0 +1,23 @@
+# Diretório de backups
+.backups/**
+
+# Diretórios virtuais de ambientes para Docker e Windows
+Docker/.venv/**
+Windows/.venv/**
+
+# Arquivos de configuração do VSCode
+.vscode/**
+
+# Arquivos de desenvolvimento e logs
+*.dev
+*.log
+
+# Arquivos de compilação do Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Arquivos de instalação e compilação
+*.egg-info/
+build/
+dist/
