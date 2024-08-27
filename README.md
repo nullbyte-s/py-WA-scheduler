@@ -95,9 +95,9 @@ O **py-WA-scheduler** é um projeto desenvolvido em Python, cujo propósito é p
 
 ### Notas da configuração
 
-> **+5588999999999**: Substitua pelo número de telefone do destinatário, incluindo o código do país.
-> **"Olá, esta é uma mensagem de teste!"**: Substitua pela mensagem que deseja enviar.
-> A primeira execução exigirá que você escaneie o QR code para autenticação. As sessões subsequentes usarão as informações salvas para restaurar a sessão.
+   - **+5588999999999**: Substitua pelo número de telefone do destinatário, incluindo o código do país.
+   - **"Olá, esta é uma mensagem de teste!"**: Substitua pela mensagem que deseja enviar.
+   - **Primeira execução:** será exigido que você escaneie o QR code para autenticação. As sessões subsequentes usarão as informações salvas para restaurar a sessão.
 
 ## Lista de Tarefas Futuras
 
