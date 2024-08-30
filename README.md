@@ -39,7 +39,11 @@ O **py-WA-scheduler** é um projeto desenvolvido em Python, cujo propósito é p
    Após a construção da imagem, você pode executar o container para enviar uma mensagem pelo WhatsApp Web:
 
    ```bash
-   docker run --rm -v py-wa-scheduler:/py-wa-scheduler py-wa-scheduler +5588999999999 "Olá, esta é uma mensagem de teste!"
+   # enviar uma mensagem diretamente do terminal
+   docker run --rm -v py-wa-scheduler:/py-wa-scheduler py-wa-scheduler +5588999999999 --message "Olá, esta é uma mensagem de teste!"
+   
+   # enviar uma mensagem a partir de um arquivo de texto
+   docker run --rm -v py-wa-scheduler:/py-wa-scheduler py-wa-scheduler +5588999999999 --file mensagem.txt
    ```
 
 ### Uso no Linux sem Docker (Debian Bookworm)
@@ -49,34 +53,37 @@ O **py-WA-scheduler** é um projeto desenvolvido em Python, cujo propósito é p
    - Instale os pacotes necessários utilizando o `apt` e o `pip`:
   
   ```bash
-  # adicionar fonte para encontrar todas as dependências do sistema
-  echo "deb http://deb.debian.org/debian/ bookworm-backports main contrib non-free unstable" | tee /etc/apt/sources.list.d/backports.list
+   # adicionar fonte para encontrar todas as dependências do sistema
+   echo "deb http://deb.debian.org/debian/ bookworm-backports main contrib non-free unstable" | tee /etc/apt/sources.list.d/backports.list
 
-  # instalar as dependências necessárias
-  apt-get update && \
-      apt-get install -y \
-      chromium \
-      chromium-driver \
-      nano \
-      libgbm-dev \
-      libzbar-dev \
-      wget \
-      xvfb
-
-  pip3 install -r requirements.txt
+   # instalar as dependências necessárias
+   apt-get update && \
+   apt-get install -y \
+   chromium \
+   chromium-driver \
+   nano \
+   libgbm-dev \
+   libzbar-dev \
+   wget \
+   xvfb
   ```
 
 2. **Configure o ambiente virtual:**
      ```bash
      python3 -m venv .venv
      source .venv/bin/activate
+     pip3 install -r requirements.txt
      ```
 
 3. **Executando o script:**
    - Para enviar uma mensagem pelo WhatsApp Web, execute o script da seguinte forma:
      
      ```bash
-     python3 -u script.py +5588999999999 "Olá, esta é uma mensagem de teste!"
+     # enviar uma mensagem diretamente do terminal
+     python3 -u script.py +5588999999999 --message "Olá, esta é uma mensagem de teste!"
+
+     # enviar uma mensagem a partir de um arquivo de texto
+     python3 -u script.py +5588999999999 --file mensagem.txt
      ```
 
 ### Usando no Windows
@@ -125,6 +132,22 @@ O **py-WA-scheduler** é um projeto desenvolvido em Python, cujo propósito é p
 
 8. **Testes:**
    - Implementar uma suíte de testes automatizados para garantir a estabilidade e confiabilidade do projeto em diferentes ambientes.
+
+---
+
+## **Exemplo de Uso:** Mensagens Automáticas de Amor com IA
+
+Os scripts Bash "ai_text_generator" e "systemd-timer_configurator" automatizam o envio de mensagens românticas e profundas para sua namorada usando o poder da inteligência artificial. Para tanto, foi utilizado o [tgpt](https://github.com/aandrew-me/tgpt). Imagine surpreendê-la frequentemente com textos que tocam o coração e demonstram o seu amor de forma única e especial! 🤫😉
+
+### Recursos
+
+* **Mensagens personalizadas:** Gere mensagens com base em um tema específico (opcional) ou deixe a IA te surpreender com sua criatividade.
+* **Agendamento pré-configurado:** O script "systemd-timer_configurator" cria o agendamento de uma mensagem por dia em horário comercial e, aleatoriamente, decide dias em que não enviará mensagem, tornando a rotina mais humanizada.
+* **Fácil de usar:** Basta fornecer o número de telefone da sua amada e, opcionalmente, um prompt personalizado para a mensagem.
+
+**Nota:** Certifique-se de editar o seu nome e o da sua namorada na variável `PROMPT_BASE` do script "ai_text_generator". Em algumas saídas, a IA pode assinar a mensagem e, se os nomes não forem fornecidos, ele criará variáveis como `[Seu Nome]`, estragando miseravelmente o efeito produzido pelas belas mensagens 🤡. Além disso, altere o número do contato programado no script "systemd-timer_configurator" e demais variáveis de ambos os scripts, conforme o seu sistema.
+
+**Lembre-se:** Estes scripts são meras ferramentas com um toque espirituoso para expressar seu amor de forma criativa. Não se esqueça de dedicar tempo para estar presente e nutrir seu relacionamento com gestos genuínos e significativos. 😄
 
 ## Considerações Finais
 

@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import argparse
 import base64
 import os
@@ -7,6 +5,7 @@ import qrcode
 import sys
 import time
 from io import BytesIO
+from multiprocessing import Process
 from numpy import array
 from PIL import Image
 from pyvirtualdisplay import Display
@@ -20,19 +19,44 @@ from selenium.webdriver.support import expected_conditions as EC
 from pyzbar.pyzbar import decode
 
 
-def wait_for_element(driver, by, value, max_attempts=3, sleep_interval=5):
+def print_with_animation(interval):
+    animation = ['⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽']
+    index = 0
+    while True:
+        print('\033[K', end=' ')
+        print(f"\033[96m{animation[index]}\033[0m", end='\r')
+        time.sleep(interval)
+        index = (index + 1) % len(animation)
+
+
+def print_progress_bar(completed, total, length=10):
+    progress = int(length * completed / total)
+    bar = '■' * progress + '□' * (length - progress)
+    sys.stdout.write(f'\r[{bar}]')
+    sys.stdout.flush()
+
+
+def wait_for_element(driver, by, value, max_attempts=10, sleep_interval=5):
     attempts = 0
-    while attempts < max_attempts:
-        try:
-            element = WebDriverWait(driver, sleep_interval).until(
-                EC.presence_of_element_located((by, value))
-            )
-            return element
-        except Exception as e:
-            print(f"Tentativa {attempts + 1} falhou: {e}")
-            time.sleep(sleep_interval)
-            attempts += 1
-    return None
+    animation_interval = 0.75
+    animation_process = Process(
+        target=print_with_animation, args=(animation_interval,))
+    animation_process.start()
+
+    try:
+        while attempts < max_attempts:
+            try:
+                element = WebDriverWait(driver, sleep_interval).until(
+                    EC.presence_of_element_located((by, value))
+                )
+                return element
+            except Exception:
+                time.sleep(sleep_interval)
+                attempts += 1
+        return None
+    finally:
+        animation_process.terminate()
+        animation_process.join()
 
 
 def render_qr_code(data):
@@ -76,31 +100,47 @@ def render_qr_code(data):
 def send_whatsapp_message(page, phone_number, message):
     page.get(f"https://web.whatsapp.com/send?phone={phone_number}")
 
-    message_box = WebDriverWait(page, 20).until(EC.presence_of_element_located(
-        (By.CSS_SELECTOR, 'div[aria-label="Digite uma mensagem"][contenteditable="true"]')))
+    message_box = wait_for_element(
+        page, By.CSS_SELECTOR, 'div[aria-label="Digite uma mensagem"][contenteditable="true"]', max_attempts=10, sleep_interval=6)
 
     if message_box:
         attempts = 0
+
         while attempts < 10:
             aria_label = message_box.get_attribute('aria-placeholder')
             if aria_label and "Digite uma mensagem" in aria_label:
                 page.execute_script("arguments[0].focus();", message_box)
+                print("Preparando envio...")
+                print_progress_bar(0, 10)
                 time.sleep(2)
-                message_box.send_keys(message)
+
+                for i, line in enumerate(message.split('\n')):
+                    message_box.send_keys(line)
+                    message_box.send_keys(Keys.SHIFT, Keys.RETURN)
+                    print_progress_bar(i + 1, len(message.split('\n')))
+                    time.sleep(1)
+
+                # os.system('clear')
+                sys.stdout.flush()
 
                 while True:
                     time.sleep(2)
                     current_text = message_box.text
                     if current_text.strip() == message.strip():
-                        message_box.send_keys(Keys.RETURN)
-                        time.sleep(5)
+                        send_button = wait_for_element(
+                            page, By.CSS_SELECTOR, 'span[data-icon="send"]')
+                        send_button.click()
+                        WebDriverWait(page, 10).until(
+                            lambda d: message_box.text == "")
+                        time.sleep(10)
                         break
 
-                print(f"Mensagem enviada para {phone_number}.")
+                print(f"\nMensagem enviada para {phone_number}.")
                 return
+
             time.sleep(2)
             attempts += 1
-            print("Falha ao localizar a caixa de mensagem correta.")
+            print("\nFalha ao localizar a caixa de mensagem correta.")
     else:
         print("Falha ao localizar a caixa de mensagem.")
 
@@ -110,8 +150,20 @@ def main():
         description="Envie mensagens pelo WhatsApp Web através do terminal.")
     parser.add_argument('phone_number', type=str,
                         help='Número de telefone do destinatário (com código do país).')
-    parser.add_argument('message', type=str, help='Mensagem a ser enviada.')
+    parser.add_argument('--message', type=str, help='Mensagem a ser enviada.')
+    parser.add_argument(
+        '--file', type=str, help='Caminho para o arquivo de texto contendo a mensagem.')
+
     args = parser.parse_args()
+
+    message = args.message
+    if args.file:
+        with open(args.file, 'r', encoding='utf-8') as f:
+            message = f.read()
+
+    if not message:
+        print("Erro: nenhuma mensagem fornecida.")
+        exit(1)
 
     user_data_dir = './User_Data'
 
@@ -161,7 +213,7 @@ def main():
             display.stop()
             exit()
 
-    send_whatsapp_message(driver, args.phone_number, args.message)
+    send_whatsapp_message(driver, args.phone_number, message)
 
     driver.quit()
     display.stop()
