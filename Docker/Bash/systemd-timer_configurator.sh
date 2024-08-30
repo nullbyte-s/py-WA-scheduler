@@ -40,9 +40,9 @@ if [[ "\$CURRENT_TIME" > "\$START_TIME" && "\$CURRENT_TIME" < "\$END_TIME" ]]; t
     if [ ! -x "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" ]; then
         chmod +x "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh"
     fi
-    if [ "$(date +%u)" -le "$((RANDOM % 7 + 1))" ]; then
+    if [ "\$(date +%u)" -le "\$((RANDOM % 7 + 1))" ]; then
         echo "Executando o script..."
-        "${USER_HOME}/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" +5588999999999
+        "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" +5588999999999
     else
         echo "O script não será executado hoje."
     fi
@@ -76,8 +76,7 @@ else
 fi
 
 systemctl daemon-reload
-systemctl enable PWS_run_in_time_slot.timer
-systemctl start PWS_run_in_time_slot.timer
+systemctl enable --now PWS_run_in_time_slot.timer
 
 echo "Configuração concluída. Timer e serviço foram habilitados e iniciados."
 
