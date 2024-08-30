@@ -5,6 +5,8 @@ if [ "$(id -u)" -ne "0" ]; then
     exit 1
 fi
 
+USER_HOME=$(getent passwd 1001 | cut -d: -f6)
+
 SERVICE_FILE="/etc/systemd/system/PWS_run_in_time_slot.service"
 if [ ! -f "$SERVICE_FILE" ]; then
     cat << EOF > "$SERVICE_FILE"
@@ -34,13 +36,13 @@ START_TIME="08:00"
 END_TIME="20:00"
 CURRENT_TIME=\$(date +%H:%M)
 
-if [[ "\$CURRENT_TIME" > "$START_TIME" && "\$CURRENT_TIME" < "$END_TIME" ]]; then
-    if [ ! -x "$HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" ]; then
-        chmod +x "$HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh"
+if [[ "\$CURRENT_TIME" > "\$START_TIME" && "\$CURRENT_TIME" < "\$END_TIME" ]]; then
+    if [ ! -x "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" ]; then
+        chmod +x "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh"
     fi
     if [ "$(date +%u)" -le "$((RANDOM % 7 + 1))" ]; then
         echo "Executando o script..."
-        "${HOME}/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" +5588999999999
+        "${USER_HOME}/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" +5588999999999
     else
         echo "O script não será executado hoje."
     fi
