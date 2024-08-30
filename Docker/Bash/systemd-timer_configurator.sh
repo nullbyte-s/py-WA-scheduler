@@ -35,6 +35,10 @@ if [ ! -f "$PWS_run_in_time_slot_FILE" ]; then
 START_TIME="08:00"
 END_TIME="20:00"
 CURRENT_TIME=\$(date +%H:%M)
+CURRENT_DATE=\$(date +"%s")
+LAST_BOOT=\$(awk '/btime/ {print \$2}' /proc/stat | xargs -I{} date -d "@{}" +%s)
+BOOT_TIME_DIFF=\$((CURRENT_DATE - LAST_BOOT))
+THRESHOLD=\$((40 * 60))
 
 if [[ "\$CURRENT_TIME" > "\$START_TIME" && "\$CURRENT_TIME" < "\$END_TIME" ]]; then
     if [ ! -x "$USER_HOME/bin/scripts/py-wa-scheduler/Bash/ai_text_generator.sh" ]; then
@@ -47,8 +51,10 @@ if [[ "\$CURRENT_TIME" > "\$START_TIME" && "\$CURRENT_TIME" < "\$END_TIME" ]]; t
         echo "O script não será executado hoje."
     fi
 else
-    echo "Fora do horário permitido. Tentando novamente em 45 minutos."
-    sudo systemctl start PWS_run_in_time_slot.timer
+    if [ "\$BOOT_TIME_DIFF" -gt "\$THRESHOLD" ]; then
+        echo "Fora do horário permitido. Tentando novamente em 45 minutos."
+        sudo systemctl start PWS_run_in_time_slot.timer
+    fi
 fi
 EOF
     chmod +x "$PWS_run_in_time_slot_FILE"
